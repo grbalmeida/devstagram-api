@@ -2,13 +2,13 @@
 
 namespace Core;
 
-class Model 
+class Model
 {
-    protected $database;
+   protected $database;
 
-    public function __construct() 
-    {
-        global $database;
-        $this->database = $database;
-    }
+   public function __construct()
+   {
+      global $database;
+      $this->database = $database;
+   }
 }

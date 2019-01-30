@@ -2,23 +2,40 @@
 
 namespace Core;
 
-class Controller 
+class Controller
 {
-    public function loadView($viewName, $viewData = []) 
-    {
-        extract($viewData);
+   public function getMethod(): string
+   {
+      return $_SERVER['REQUEST_METHOD'];
+   }
 
-        require 'Views/'.$viewName.'.php';
-    }
+   public function getRequestData(): array
+   {
+      switch ($this->getMethod()) {
+			case 'GET':
+				return $_GET;
+				break;
+			case 'PUT':
+			case 'DELETE':
+				parse_str(file_get_contents('php://input'), $data);
+				return (array) $data;
+				break;
+			case 'POST':
+				$data = json_decode(parse_str(file_get_contents('php://input'), $data));
 
-    public function loadTemplate($viewName, $viewData = []) 
-    {
-        require 'Views/template.php';
-    }
+				if (is_null($data)) {
+					$data = $_POST;
+				}
 
-    public function loadViewInTemplate($viewName, $viewData = []) 
-    {
-        extract($viewData);
-        require 'Views/'.$viewName.'.php';
-    }
+				return (array) $data;
+				break;
+      }
+   }
+
+   public function returnJson(array $array): void
+   {
+		header('Content-Type: application/json');
+		echo json_encode($array);
+		exit;
+   }
 }
