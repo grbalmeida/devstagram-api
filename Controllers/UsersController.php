@@ -25,7 +25,7 @@ class UsersController extends Controller
       if ($method === 'POST') {
          if (!empty($data['email']) && !empty($data['password'])) {
             if ($this->user->checkCredentials($data['email'], $data['password'])) {
-
+               $array['jwt'] = $this->user->createJwt();
             } else {
                $array['error'] = 'Denied access';
             }

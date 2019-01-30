@@ -10,12 +10,14 @@ if(ENVIRONMENT == 'development') {
    $config['host'] = 'localhost';
    $config['database_user'] = 'root';
    $config['database_password'] = '';
+   $config['jwt_secret_key'] = 'devstagram_key_123';
 } else {
    define('BASE_URL', 'http://mywebsite.com');
    $config['database_name'] = 'mvc_boilerplate_php';
    $config['host'] = 'localhost';
    $config['database_user'] = 'root';
    $config['database_password'] = '';
+   $config['jwt_secret_key'] = 'devstagram_key_123';
 }
 
 global $database;

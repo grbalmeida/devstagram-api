@@ -3,10 +3,18 @@
 namespace Models;
 
 use \Core\Model;
+use \Models\Jwt;
 
 class User extends Model
 {
    private $id;
+   private $jwt;
+
+   public function __construct()
+   {
+      parent::__construct();
+      $this->jwt = new Jwt();
+   }
 
    public function checkCredentials(string $email, string $password): bool
    {
@@ -25,5 +33,10 @@ class User extends Model
       }
 
       return false;
+   }
+
+   public function createJwt(): string
+   {
+      return $this->jwt->create(['user_id' => $this->id]);
    }
 }
