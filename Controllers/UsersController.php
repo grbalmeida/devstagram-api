@@ -87,7 +87,8 @@ class UsersController extends Controller
                if (!count($array['data']) > 0) $array['error'] = 'User does not exist';
                break;
             case 'PUT':
-
+               $info = $this->user->edit($id, $data);
+               if ($info !== '') $array['error'] = $info;
                break;
             case 'DELETE':
 

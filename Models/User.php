@@ -135,4 +135,48 @@ class User extends Model
 
       return false;
    }
+
+   public function edit(int $id, array $data): string
+   {
+      if ($id === $this->getId()) {
+         $toChange = [];
+
+         if (!empty($data['name'])) $toChange['name'] = $data['name'];
+         if (!empty($data['email'])) {
+            if (filter_var($data['email'], FILTER_VALIDATE_EMAIL)
+            && !$this->emailExists($data['email'])) {
+               $toChange['email'] = $data['email'];
+            } else {
+               return 'Invalid or already registered email';
+            }
+         }
+
+         if (!empty($data['password']))
+            $toChange['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+
+         if (count($toChange) > 0) {
+            $fields = [];
+
+            foreach ($toChange as $key => $value) {
+               $fields[] = $key. ' = :'.$key;
+            }
+
+            $sql = 'UPDATE users SET '.implode(',', $fields).' WHERE id = :id';
+            $sql = $this->database->prepare($sql);
+            $sql->bindValue(':id', $id);
+
+            foreach ($toChange as $key => $value) {
+               $sql->bindValue(':'.$key, $value);
+            }
+
+            $sql->execute();
+         } else {
+            return 'Fill in the data correctly';
+         }
+
+         return '';
+      }
+
+      return 'It is not allowed to edit another user';
+   }
 }
