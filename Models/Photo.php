@@ -20,4 +20,22 @@ class Photo extends Model
 
       return $sql->fetch(\PDO::FETCH_ASSOC)['count'];
    }
+
+   public function deleteAll(int $id): void
+   {
+      $sql = 'DELETE FROM photos WHERE user_id = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindParam(':id', $id);
+      $sql->execute();
+
+      $sql = 'DELETE FROM photos_has_comments WHERE user_id = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindParam(':id', $id);
+      $sql->execute();
+
+      $sql = 'DELETE FROM photos_has_likes WHERE user_id = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindParam(':id', $id);
+      $sql->execute();
+   }
 }

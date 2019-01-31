@@ -91,7 +91,8 @@ class UsersController extends Controller
                if ($info !== '') $array['error'] = $info;
                break;
             case 'DELETE':
-
+               $info = $this->user->delete($id);
+               if ($info !== '') $array['error'] = $info;
                break;
             default:
             $array['error'] = 'Method not allowed';

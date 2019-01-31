@@ -179,4 +179,26 @@ class User extends Model
 
       return 'It is not allowed to edit another user';
    }
+
+   public function delete(int $id): string
+   {
+      if ($id === $this->getId()) {
+         // ON DELETE CASCADE
+         $this->photo->deleteAll($id);
+
+         $sql = 'DELETE FROM followers WHERE second_user = :id OR first_user = :id';
+         $sql = $this->database->prepare($sql);
+         $sql->bindParam(':id', $id);
+         $sql->execute();
+
+         $sql = 'DELETE FROM users WHERE id = :id';
+         $sql = $this->database->prepare($sql);
+         $sql->bindParam(':id', $id);
+         $sql->execute();
+
+         return '';
+      }
+
+      return 'Deleting another user is not allowed';
+   }
 }
