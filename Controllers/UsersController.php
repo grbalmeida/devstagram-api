@@ -65,4 +65,38 @@ class UsersController extends Controller
 
       $this->returnJson($array);
    }
+
+   public function view(int $id)
+   {
+      $array = ['logged' => false];
+      $method = $this->getMethod();
+      $data = $this->getRequestData();
+
+      if (!empty($data['jwt']) && $this->user->validateJwt($data['jwt'])) {
+         $array['logged'] = true;
+         $array['is_me'] = false;
+
+         if ($id === $this->user->getId()) {
+            $array['is_me'] = true;
+         }
+
+         switch ($method) {
+            case 'GET':
+
+               break;
+            case 'PUT':
+
+               break;
+            case 'DELETE':
+
+               break;
+            default:
+            $array['error'] = 'Method not allowed';
+         }
+      } else {
+         $array['error'] = 'Access denied';
+      }
+
+      $this->returnJson($array);
+   }
 }

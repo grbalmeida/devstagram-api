@@ -12,13 +12,13 @@ class Jwt extends Model
 		$payload = json_encode($data);
 		$hbase = $this->base64_encode($header);
 		$pbase = $this->base64_encode($payload);
-		$signature = hash_hmac("sha256", $hbase.".".$pbase, $config['jwt_secret_key'], true );
+		$signature = hash_hmac("sha256", $hbase.".".$pbase, $config['jwt_secret_key'], true);
 		$bsig = $this->base64_encode($signature);
 		$jwt = $hbase.".".$pbase.".".$bsig;
 		return $jwt;
    }
 
-	public function validate($jwt): array {
+	public function validate($jwt) {
 		global $config;
 		$array = array();
 		$jwt_splits = explode('.', $jwt);
@@ -28,8 +28,8 @@ class Jwt extends Model
 			if($bsig == $jwt_splits[2]) {
 				$array = json_decode($this->base64_decode($jwt_splits[1]));
 			}
-		}
-		return $array;
+      }
+      return $array;
    }
 
 	private function base64_encode($data) {

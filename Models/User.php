@@ -8,12 +8,10 @@ use \Models\Jwt;
 class User extends Model
 {
    private $id;
-   private $jwt;
 
    public function __construct()
    {
       parent::__construct();
-      $this->jwt = new Jwt();
    }
 
    public function create(string $name, string $email, string $password): bool
@@ -42,7 +40,6 @@ class User extends Model
 
       if ($sql->rowCount() > 0) {
          $info = $sql->fetch(\PDO::FETCH_ASSOC);
-
          if (password_verify($password, $info['password'])) {
             $this->id = $info['id'];
             return true;
@@ -52,9 +49,28 @@ class User extends Model
       return false;
    }
 
+   public function getId(): int
+   {
+      return $this->id;
+   }
+
    public function createJwt(): string
    {
-      return $this->jwt->create(['user_id' => $this->id]);
+      $jwt = new Jwt();
+      return $jwt->create(['user_id' => $this->id]);
+   }
+
+   public function validateJwt(string $token): bool
+   {
+      $jwt = new Jwt();
+      $info = $jwt->validate($token);
+
+      if (isset($info->user_id)) {
+         $this->id = $info->user_id;
+         return true;
+      }
+
+      return false;
    }
 
    private function emailExists(string $email): bool
