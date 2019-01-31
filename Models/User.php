@@ -16,6 +16,23 @@ class User extends Model
       $this->jwt = new Jwt();
    }
 
+   public function create(string $name, string $email, string $password): bool
+   {
+      if (!$this->emailExists($email)) {
+         $hash = password_hash($password, PASSWORD_DEFAULT);
+         $sql = 'INSERT INTO users (name, email, password) VALUES (:name, :email, :password)';
+         $sql = $this->database->prepare($sql);
+         $sql->bindValue(':name', $name);
+         $sql->bindValue(':email', $email);
+         $sql->bindValue(':password', $hash);
+         $sql->execute();
+         $this->id = $this->database->lastInsertId();
+         return true;
+      }
+
+      return false;
+   }
+
    public function checkCredentials(string $email, string $password): bool
    {
       $sql = 'SELECT id, password FROM users WHERE email = :email';
@@ -38,5 +55,19 @@ class User extends Model
    public function createJwt(): string
    {
       return $this->jwt->create(['user_id' => $this->id]);
+   }
+
+   private function emailExists(string $email): bool
+   {
+      $sql = 'SELECT id FROM users WHERE email = :email';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':email', $email);
+      $sql->execute();
+
+      if ($sql->rowCount() > 0) {
+         return true;
+      }
+
+      return false;
    }
 }
