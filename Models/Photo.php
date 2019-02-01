@@ -64,7 +64,7 @@ class Photo extends Model
                $user = $userModel->getInfo($value['user_id']);
                $array[$key]['name'] = $user['name'];
                $array[$key]['avatar'] = $user['avatar'];
-               $array[$key]['url'] = BASE_URL.'/assets/images/avatar/'.$value['url'];
+               $array[$key]['url'] = BASE_URL.'/assets/images/photos/'.$value['url'];
                $array[$key]['like_count'] = $this->getLikeCount($value['id']);
                $array[$key]['comments'] = $this->getComments($value['id']);
             }
@@ -98,6 +98,31 @@ class Photo extends Model
 
       if ($sql->rowCount() > 0) {
          $array = $sql->fetchAll(\PDO::FETCH_ASSOC);
+      }
+
+      return $array;
+   }
+
+   public function getPhotosFromUser(int $id, int $offset, int $per_page): array
+   {
+      $array = [];
+
+      $sql = "SELECT * FROM photos
+               WHERE user_id = :id
+               ORDER BY id DESC
+               LIMIT ".$offset.", ".$per_page;
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':id', $id);
+      $sql->execute();
+
+      if ($sql->rowCount() > 0) {
+         $array = $sql->fetchAll(\PDO::FETCH_ASSOC);
+
+         foreach ($array as $key => $value) {
+            $array[$key]['url'] = BASE_URL.'/assets/images/photos/'.$value['url'];
+            $array[$key]['like_count'] = $this->getLikeCount($value['id']);
+            $array[$key]['comments'] = $this->getComments($value['id']);
+         }
       }
 
       return $array;

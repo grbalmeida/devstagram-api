@@ -4,6 +4,7 @@ namespace Controllers;
 
 use \Core\Controller;
 use \Models\User;
+use \Models\Photo;
 
 class UsersController extends Controller
 {
@@ -12,6 +13,7 @@ class UsersController extends Controller
    public function __construct()
    {
       $this->user = new User();
+      $this->photo = new Photo();
    }
 
    public function index(): void {}
@@ -104,7 +106,7 @@ class UsersController extends Controller
       $this->returnJson($array);
    }
 
-   public function feed(): array
+   public function feed()
    {
       $array = ['logged' => false];
       $method = $this->getMethod();
@@ -119,6 +121,35 @@ class UsersController extends Controller
             $per_page = 10;
             if (!empty($data['per_page'])) $per_page = intval($data['per_page']);
             $array['data'] = $this->user->getFeed($offset, $per_page);
+         } else {
+            $array['error'] = 'Method not allowed';
+         }
+
+      } else {
+         $array['error'] = 'Access denied';
+      }
+
+      $this->returnJson($array);
+   }
+
+   public function photos(int $id)
+   {
+      $array = ['logged' => false];
+      $method = $this->getMethod();
+      $data = $this->getRequestData();
+
+      if (!empty($data['jwt']) && $this->user->validateJwt($data['jwt'])) {
+         $array['logged'] = true;
+         $array['is_me'] = false;
+
+         if ($id === $this->user->getId()) $array['is_me'] = true;
+
+         if ($method === 'GET') {
+            $offset = 0;
+            if (!empty($data['offset'])) $offset = intval($data['offset']);
+            $per_page = 10;
+            if (!empty($data['per_page'])) $per_page = intval($data['per_page']);
+            $array['data'] = $this->photo->getPhotosFromUser($id, $offset, $per_page);
          } else {
             $array['error'] = 'Method not allowed';
          }
