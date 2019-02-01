@@ -12,6 +12,36 @@ class Photo extends Model
       parent::__construct();
    }
 
+   public function getRandomPhotos(int $per_page, array $excludes = []): array
+   {
+      $array = [];
+
+      $excludes = array_map(function($value) {
+         return intval($value);
+      }, $excludes);
+
+      $sql = 'SELECT id, user_id, url FROM photos ';
+
+      if (count($excludes) > 0) $sql .= 'WHERE id NOT IN('.implode(',', $excludes).') ';
+
+      $sql .= 'ORDER BY RAND() LIMIT '.$per_page;
+      $sql = $this->database->prepare($sql);
+
+      $sql->execute();
+
+      if ($sql->rowCount() > 0) {
+         $array = $sql->fetchAll(\PDO::FETCH_ASSOC);
+
+         foreach ($array as $key => $value) {
+            $array[$key]['url'] = BASE_URL.'/assets/images/photos/'.$value['url'];
+            $array[$key]['like_count'] = $this->getLikeCount($value['id']);
+            $array[$key]['comments'] = $this->getComments($value['id']);
+         }
+      }
+
+      return $array;
+   }
+
    public function getPhotosCount(int $id): int
    {
       $sql = 'SELECT COUNT(*) AS count FROM photos WHERE user_id = :id';
