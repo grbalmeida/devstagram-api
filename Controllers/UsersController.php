@@ -103,4 +103,30 @@ class UsersController extends Controller
 
       $this->returnJson($array);
    }
+
+   public function feed(): array
+   {
+      $array = ['logged' => false];
+      $method = $this->getMethod();
+      $data = $this->getRequestData();
+
+      if (!empty($data['jwt']) && $this->user->validateJwt($data['jwt'])) {
+         $array['logged'] = true;
+
+         if ($method === 'GET') {
+            $offset = 0;
+            if (!empty($data['offset'])) $offset = intval($data['offset']);
+            $per_page = 10;
+            if (!empty($data['per_page'])) $per_page = intval($data['per_page']);
+            $array['data'] = $this->user->getFeed($offset, $per_page);
+         } else {
+            $array['error'] = 'Method not allowed';
+         }
+
+      } else {
+         $array['error'] = 'Access denied';
+      }
+
+      $this->returnJson($array);
+   }
 }

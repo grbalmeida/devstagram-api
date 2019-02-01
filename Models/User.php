@@ -70,14 +70,40 @@ class User extends Model
          $array = $sql->fetch(\PDO::FETCH_ASSOC);
 
          if (!empty($array['avatar'])) {
-            $array['avatar'] = BASE_URL.'/media/avatar/'.$array['avatar'];
+            $array['avatar'] = BASE_URL.'/assets/images/avatar/'.$array['avatar'];
          } else {
-            $array['avatar'] = BASE_URL.'/media/avatar/default.jpg';
+            $array['avatar'] = BASE_URL.'/assets/images/avatar/default.jpg';
          }
 
          $array['following'] = $this->getFollowingCount($id);
          $array['followers'] = $this->getFollowersCount($id);
          $array['photos_count'] = $this->photo->getPhotosCount($id);
+      }
+
+      return $array;
+   }
+
+   public function getFeed(int $offset = 0, int $per_page = 10): array
+   {
+      $following = $this->getFollowing($this->getId());
+      return $this->photo->getFeedCollection($following, $offset, $per_page);
+   }
+
+   public function getFollowing(int $id): array
+   {
+      $array = [];
+
+      $sql = 'SELECT second_user FROM followers WHERE first_user = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':id', $id);
+      $sql->execute();
+
+      if ($sql->rowCount() > 0) {
+         $data = $sql->fetchAll(\PDO::FETCH_ASSOC);
+
+         foreach ($data as $item) {
+            $array[] = intval($item['second_user']);
+         }
       }
 
       return $array;
