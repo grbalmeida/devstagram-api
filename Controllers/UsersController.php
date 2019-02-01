@@ -160,4 +160,31 @@ class UsersController extends Controller
 
       $this->returnJson($array);
    }
+
+   public function follow(): void
+   {
+      $array = ['logged' => false];
+      $method = $this->getMethod();
+      $data = $this->getRequestData();
+
+      if (!empty($data['jwt']) && $this->user->validateJwt($data['jwt'])) {
+         $array['logged'] = true;
+
+         switch ($method) {
+            case 'POST':
+               $this->user->follow($id);
+               break;
+            case 'DELETE':
+               $this->user->unfollow($id);
+               break;
+            default:
+               $array['error'] = 'Method not allowed';
+         }
+
+      } else {
+         $array['error'] = 'Access denied';
+      }
+
+      $this->returnJson($array);
+   }
 }

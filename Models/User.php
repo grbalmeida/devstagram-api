@@ -227,4 +227,35 @@ class User extends Model
 
       return 'Deleting another user is not allowed';
    }
+
+   public function follow(int $id): void
+   {
+      $sql = 'SELECT COUNT(*) AS count
+               FROM followers
+               WHERE first_user = :first_user
+               AND second_user = :second_user';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':first_user', $this->getId());
+      $sql->bindValue(':second_user', $id);
+      $sql->execute();
+
+      if ($sql->fetch(\PDO::FETCH_ASSOC)['count'] === 0) {
+         $sql = 'INSERT INTO followers (first_user, second_user) VALUES (:first_user, :second_user)';
+         $sql = $this->database->prepare($sql);
+         $sql->bindValue(':first_user', $this->getId());
+         $sql->bindValue(':second_user', $id);
+         $sql->execute();
+      }
+   }
+
+   public function unfollow(int $id): void
+   {
+      $sql = 'DELETE FROM followers
+               WHERE first_user = :first_user
+               AND second_user = :second_user';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':first_user', $this->getId());
+      $sql->bindValue(':second_user', $id);
+      $sql->execute();
+   }
 }
