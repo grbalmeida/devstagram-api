@@ -92,8 +92,28 @@ class PhotosController extends Controller
                   $array['error'] = 'The comment field can not be empty';
                }
                break;
+            default:
+               $array['error'] = 'Method not allowed';
+         }
+      } else {
+         $array['error'] = 'Access denied';
+      }
+
+      $this->returnJson($array);
+   }
+
+   public function deleteComment(int $id): void
+   {
+      $array = ['logged' => false];
+      $method = $this->getMethod();
+      $data = $this->getRequestData();
+
+      if (!empty($data['jwt']) && $this->user->validateJwt($data['jwt'])) {
+         $array['logged'] = true;
+
+         switch ($method) {
             case 'DELETE':
-               $info = $this->photo->deletePhoto($id, $this->user->getId());
+               $info = $this->photo->deleteComment($id, $this->user->getId());
                if ($info !== '') $array['error'] = $info;
                break;
             default:

@@ -231,4 +231,26 @@ class Photo extends Model
 
       return 'This photo does not exist';
    }
+
+   public function deleteComment(int $comment_id, int $user_id): string
+   {
+      $sql = 'SELECT COUNT(*) AS count
+               FROM photos_has_comments
+               WHERE user_id = :user_id
+               AND id = :comment_id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':user_id', $user_id);
+      $sql->bindValue(':comment_id', $comment_id);
+      $sql->execute();
+
+      if ($sql->fetch(\PDO::FETCH_ASSOC)['count'] > 0) {
+         $sql = 'DELETE FROM photos_has_comments WHERE id = :comment_id';
+         $sql = $this->database->prepare($sql);
+         $sql->bindValue(':comment_id', $comment_id);
+         $sql->execute();
+         return '';
+      }
+
+      return 'You can not delete this comment';
+   }
 }
