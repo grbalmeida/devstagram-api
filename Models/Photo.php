@@ -42,6 +42,36 @@ class Photo extends Model
       return $array;
    }
 
+   public function deletePhoto(int $photo_id, int $user_id): string
+   {
+      $sql = 'SELECT id FROM photos WHERE id = :photo_id AND user_id = :user_id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindParam(':photo_id', $photo_id);
+      $sql->bindParam(':user_id', $user_id);
+      $sql->execute();
+
+      if ($sql->rowCount() > 0) {
+         $sql = 'DELETE FROM photos_has_comments WHERE photo_id = :id';
+         $sql = $this->database->prepare($sql);
+         $sql->bindParam(':id', $photo_id);
+         $sql->execute();
+
+         $sql = 'DELETE FROM photos_has_likes WHERE photo_id = :id';
+         $sql = $this->database->prepare($sql);
+         $sql->bindParam(':id', $photo_id);
+         $sql->execute();
+
+         $sql = 'DELETE FROM photos WHERE id = :id';
+         $sql = $this->database->prepare($sql);
+         $sql->bindParam(':id', $photo_id);
+         $sql->execute();
+
+         return '';
+      }
+
+      return 'You can not delete this photo';
+   }
+
    public function getPhotosCount(int $id): int
    {
       $sql = 'SELECT COUNT(*) AS count FROM photos WHERE user_id = :id';
@@ -54,17 +84,17 @@ class Photo extends Model
 
    public function deleteAll(int $id): void
    {
-      $sql = 'DELETE FROM photos WHERE user_id = :id';
-      $sql = $this->database->prepare($sql);
-      $sql->bindParam(':id', $id);
-      $sql->execute();
-
       $sql = 'DELETE FROM photos_has_comments WHERE user_id = :id';
       $sql = $this->database->prepare($sql);
       $sql->bindParam(':id', $id);
       $sql->execute();
 
       $sql = 'DELETE FROM photos_has_likes WHERE user_id = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindParam(':id', $id);
+      $sql->execute();
+
+      $sql = 'DELETE FROM photos WHERE user_id = :id';
       $sql = $this->database->prepare($sql);
       $sql->bindParam(':id', $id);
       $sql->execute();

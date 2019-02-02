@@ -61,7 +61,8 @@ class PhotosController extends Controller
                $array['data'] = $this->photo->getPhoto($id);
                break;
             case 'DELETE':
-
+               $info = $this->photo->deletePhoto($id, $this->user->getId());
+               if ($info !== '') $array['error'] = $info;
                break;
             default:
                $array['error'] = 'Method not allowed';
