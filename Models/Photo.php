@@ -113,6 +113,29 @@ class Photo extends Model
       return $sql->fetch(\PDO::FETCH_ASSOC)['count'];
    }
 
+   public function getPhoto(int $id): array
+   {
+      $array = [];
+
+      $sql = 'SELECT id, user_id, url FROM photos WHERE id = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':id', $id);
+      $sql->execute();
+
+      if ($sql->rowCount() > 0) {
+         $array = $sql->fetch(\PDO::FETCH_ASSOC);
+         $userModel = new User();
+         $user = $userModel->getInfo($array['user_id']);
+         $array['name'] = $user['name'];
+         $array['avatar'] = $user['avatar'];
+         $array['url'] = BASE_URL.'/assets/images/photos/'.$array['url'];
+         $array['like_count'] = $this->getLikeCount($array['id']);
+         $array['comments'] = $this->getComments($array['id']);
+      }
+
+      return $array;
+   }
+
    public function getComments(int $id): array
    {
       $array = [];
