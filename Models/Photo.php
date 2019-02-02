@@ -210,4 +210,25 @@ class Photo extends Model
 
       return $array;
    }
+
+   public function addComment(int $photo_id, int $user_id, string $comment): string
+   {
+      $sql = 'SELECT COUNT(*) AS count FROM photos WHERE id = :id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':id', $photo_id);
+      $sql->execute();
+
+      if ($sql->fetch(\PDO::FETCH_ASSOC)['count'] > 0) {
+         $sql = 'INSERT INTO photos_has_comments(user_id, photo_id, created_at, comment)
+               VALUES (:user_id, :photo_id, NOW(), :comment)';
+         $sql = $this->database->prepare($sql);
+         $sql->bindValue(':user_id', $user_id);
+         $sql->bindValue(':photo_id', $photo_id);
+         $sql->bindValue(':comment', $comment);
+         $sql->execute();
+         return '';
+      }
+
+      return 'This photo does not exist';
+   }
 }
