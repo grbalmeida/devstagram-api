@@ -253,4 +253,37 @@ class Photo extends Model
 
       return 'You can not delete this comment';
    }
+
+   public function like(int $photo_id, int $user_id): void
+   {
+      if ($this->alreadyLiked($photo_id, $user_id)) {
+         $sql = 'DELETE FROM photos_has_likes
+                  WHERE user_id = :user_id
+                  AND photo_id = :photo_id';
+      } else {
+         $sql = 'INSERT INTO photos_has_likes
+                  (user_id, photo_id)
+                  VALUES
+                  (:user_id, :photo_id)';
+      }
+
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':user_id', $user_id);
+      $sql->bindValue(':photo_id', $photo_id);
+      $sql->execute();
+   }
+
+   private function alreadyLiked(int $photo_id, int $user_id): bool
+   {
+      $sql = 'SELECT COUNT(*) AS count
+               FROM photos_has_likes
+               WHERE user_id = :user_id
+               AND photo_id = :photo_id';
+      $sql = $this->database->prepare($sql);
+      $sql->bindValue(':user_id', $user_id);
+      $sql->bindValue(':photo_id', $photo_id);
+      $sql->execute();
+
+      return $sql->fetch(\PDO::FETCH_ASSOC)['count'] > 0;
+   }
 }
